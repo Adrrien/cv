@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "experience": "Experience",
+    "education": "Education",
+    "contact": "Contact"
+  },
+  "hero": {
+    "subtitle": "Full-Stack Developer & AI Enthusiast",
+    "cta": "Explore my journey"
+  },
+  "timeline": {
+    "experience_title": "Experience",
+    "education_title": "Education",
+    "present": "Present"
+  },
+  "experiences": [
+    {
+      "title": "Software Engineer Intern",
+      "company": "Tech Company",
+      "period": "2024 — Present",
+      "description": "Building scalable web applications with React, Node.js and cloud infrastructure.",
+      "tags": ["React", "Node.js", "AWS"]
+    },
+    {
+      "title": "Full-Stack Developer",
+      "company": "Startup",
+      "period": "2023 — 2024",
+      "description": "Developed end-to-end features for a SaaS platform serving 10k+ users.",
+      "tags": ["Vue.js", "Python", "PostgreSQL"]
+    },
+    {
+      "title": "Web Developer",
+      "company": "Agency",
+      "period": "2022 — 2023",
+      "description": "Designed and built responsive websites and e-commerce platforms for clients.",
+      "tags": ["HTML", "CSS", "JavaScript", "WordPress"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master's in Computer Science",
+      "school": "University of Technology",
+      "period": "2023 — 2025",
+      "description": "Specialization in AI & Machine Learning, distributed systems."
+    },
+    {
+      "degree": "Bachelor's in Software Engineering",
+      "school": "Engineering School",
+      "period": "2020 — 2023",
+      "description": "Core curriculum in algorithms, data structures, and software architecture."
+    },
+    {
+      "degree": "Scientific Baccalaureate",
+      "school": "High School",
+      "period": "2020",
+      "description": "Major in Mathematics and Physics, graduated with honors."
+    }
+  ],
+  "contact": {
+    "title": "Let's talk",
+    "email": "adrrien.chandrakumar@gmail.com",
+    "github": "GitHub",
+    "linkedin": "LinkedIn"
+  }
+}

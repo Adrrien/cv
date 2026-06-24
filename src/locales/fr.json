@@ -1,0 +1,65 @@
+{
+  "nav": {
+    "experience": "Expérience",
+    "education": "Formation",
+    "contact": "Contact"
+  },
+  "hero": {
+    "subtitle": "Développeur Full-Stack & Passionné d'IA",
+    "cta": "Explorer mon parcours"
+  },
+  "timeline": {
+    "experience_title": "Expériences",
+    "education_title": "Formations",
+    "present": "Aujourd'hui"
+  },
+  "experiences": [
+    {
+      "title": "Ingénieur Logiciel (Stage)",
+      "company": "Tech Company",
+      "period": "2024 — Aujourd'hui",
+      "description": "Développement d'applications web scalables avec React, Node.js et infrastructure cloud.",
+      "tags": ["React", "Node.js", "AWS"]
+    },
+    {
+      "title": "Développeur Full-Stack",
+      "company": "Startup",
+      "period": "2023 — 2024",
+      "description": "Développement de fonctionnalités end-to-end pour une plateforme SaaS avec 10k+ utilisateurs.",
+      "tags": ["Vue.js", "Python", "PostgreSQL"]
+    },
+    {
+      "title": "Développeur Web",
+      "company": "Agence",
+      "period": "2022 — 2023",
+      "description": "Conception et développement de sites responsive et plateformes e-commerce pour clients.",
+      "tags": ["HTML", "CSS", "JavaScript", "WordPress"]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Master Informatique",
+      "school": "Université de Technologie",
+      "period": "2023 — 2025",
+      "description": "Spécialisation IA & Machine Learning, systèmes distribués."
+    },
+    {
+      "degree": "Licence Génie Logiciel",
+      "school": "École d'Ingénieurs",
+      "period": "2020 — 2023",
+      "description": "Algorithmique, structures de données, architecture logicielle."
+    },
+    {
+      "degree": "Baccalauréat Scientifique",
+      "school": "Lycée",
+      "period": "2020",
+      "description": "Spécialité Mathématiques et Physique, mention Très Bien."
+    }
+  ],
+  "contact": {
+    "title": "Discutons",
+    "email": "adrrien.chandrakumar@gmail.com",
+    "github": "GitHub",
+    "linkedin": "LinkedIn"
+  }
+}
