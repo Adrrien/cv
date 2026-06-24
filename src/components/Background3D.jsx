@@ -1,72 +1,91 @@
-import { useRef, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import * as THREE from 'three'
+import { useEffect, useRef } from 'react'
 
-function StarField() {
-  const count = 280
-  const positions = useMemo(() => {
-    const pos = new Float32Array(count * 3)
-    for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2
-      const phi = Math.acos(2 * Math.random() - 1)
-      const r = 12 + Math.random() * 18
-      pos[i * 3] = r * Math.sin(phi) * Math.cos(theta)
-      pos[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
-      pos[i * 3 + 2] = r * Math.cos(phi) - 8
+export default function Background3D({ theme }) {
+  const cvRef = useRef(null)
+
+  useEffect(() => {
+    const cv = cvRef.current
+    if (!cv) return
+    const ctx = cv.getContext('2d')
+    let W, H, dpr, raf
+
+    const resize = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2)
+      W = window.innerWidth
+      H = window.innerHeight
+      cv.width = W * dpr
+      cv.height = H * dpr
+      cv.style.width = W + 'px'
+      cv.style.height = H + 'px'
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     }
-    return pos
-  }, [])
+    resize()
+    window.addEventListener('resize', resize)
+
+    const noise = (x, y, t) =>
+      Math.sin(x * 0.016 + t * 0.22) * 32
+      + Math.cos(y * 0.022 + t * 0.15) * 22
+      + Math.sin((x + y) * 0.010 + t * 0.31) * 16
+      + Math.cos(x * 0.007 - y * 0.009 + t * 0.18) * 10
+
+    const getScroll = () => {
+      const hero = document.getElementById('hero-section')
+      return hero ? Math.max(0, -hero.getBoundingClientRect().top) : (window.scrollY || 0)
+    }
+
+    const isLight = () => theme === 'light'
+
+    const draw = (now) => {
+      const t = now * 0.001
+      const sc = getScroll()
+      const light = isLight()
+
+      ctx.fillStyle = light ? '#eef2f8' : '#05060a'
+      ctx.fillRect(0, 0, W, H)
+
+      const LINE_SPACING = 14
+      const numLines = Math.ceil(H / LINE_SPACING) + 6
+      const scrollOffset = (sc * 0.04) % LINE_SPACING
+
+      for (let row = 0; row < numLines; row++) {
+        const baseY = row * LINE_SPACING - scrollOffset
+        if (baseY < -LINE_SPACING * 2 || baseY > H + LINE_SPACING) continue
+        const brightness = 0.5 + 0.5 * Math.sin(row * 0.19 + t * 0.35)
+        ctx.beginPath()
+        ctx.moveTo(-4, baseY + noise(0, baseY, t))
+        for (let x = 0; x <= W + 4; x += 4) {
+          ctx.lineTo(x, baseY + noise(x, baseY, t))
+        }
+        const hue = 215 + Math.sin(row * 0.18 + t * 0.18) * 25
+        const alpha = light
+          ? (0.06 + brightness * 0.10)
+          : (0.10 + brightness * 0.20)
+        ctx.strokeStyle = `hsla(${hue.toFixed(1)},50%,${light ? 40 : 62}%,${alpha.toFixed(3)})`
+        ctx.lineWidth = 0.7
+        ctx.stroke()
+      }
+
+      const ag = ctx.createRadialGradient(W * 0.62, H * 0.42, 0, W * 0.62, H * 0.42, Math.min(W, H) * 0.55)
+      ag.addColorStop(0, light ? 'rgba(232,82,11,0.04)' : 'rgba(232,82,11,0.05)')
+      ag.addColorStop(0.5, light ? 'rgba(72,153,208,0.03)' : 'rgba(72,153,208,0.04)')
+      ag.addColorStop(1, 'rgba(0,0,0,0)')
+      ctx.fillStyle = ag
+      ctx.fillRect(0, 0, W, H)
+
+      raf = requestAnimationFrame(draw)
+    }
+    raf = requestAnimationFrame(draw)
+
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [theme])
 
   return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
-      </bufferGeometry>
-      <pointsMaterial size={0.045} color="#A8C4DC" transparent opacity={0.75} sizeAttenuation />
-    </points>
-  )
-}
-
-function OrbitalRing({ radius, inclination, yaw, speed, color, opacity }) {
-  const ref = useRef()
-  useFrame(() => {
-    ref.current.rotation.y += speed
-  })
-  return (
-    <group ref={ref} rotation={[inclination, yaw, 0]}>
-      <mesh>
-        <torusGeometry args={[radius, 0.007, 8, 140]} />
-        <meshBasicMaterial color={color} transparent opacity={opacity} />
-      </mesh>
-    </group>
-  )
-}
-
-function GlowCore() {
-  const ref = useRef()
-  useFrame((state) => {
-    ref.current.material.opacity = 0.06 + Math.sin(state.clock.elapsedTime * 0.6) * 0.02
-  })
-  return (
-    <mesh ref={ref} position={[0, 0, -4]}>
-      <sphereGeometry args={[1.2, 32, 32]} />
-      <meshBasicMaterial color="#E8520B" transparent opacity={0.06} />
-    </mesh>
-  )
-}
-
-export default function Background3D() {
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none' }}>
-      <Canvas camera={{ position: [0, 1.5, 9], fov: 52 }} gl={{ antialias: true, alpha: true }}>
-        <StarField />
-        <GlowCore />
-        <OrbitalRing radius={4.2} inclination={0.48} yaw={0.2} speed={0.0008} color="#E8520B" opacity={0.22} />
-        <OrbitalRing radius={5.8} inclination={-0.75} yaw={1.1} speed={0.0005} color="#4899D0" opacity={0.16} />
-        <OrbitalRing radius={3.1} inclination={1.15} yaw={0.6} speed={0.0012} color="#E8520B" opacity={0.13} />
-        <OrbitalRing radius={7.2} inclination={0.28} yaw={-0.4} speed={0.0003} color="#4899D0" opacity={0.10} />
-        <OrbitalRing radius={2.4} inclination={-1.4} yaw={0.9} speed={0.0018} color="#E8A07A" opacity={0.09} />
-      </Canvas>
-    </div>
+    <canvas
+      ref={cvRef}
+      style={{ position: 'fixed', inset: 0, zIndex: 0, display: 'block', pointerEvents: 'none' }}
+    />
   )
 }
