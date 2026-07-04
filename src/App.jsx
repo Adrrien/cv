@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+import { useState, useLayoutEffect } from 'react'
+import { flushSync } from 'react-dom'
 import { AdminProvider } from './context/AdminContext'
 import Background3D from './components/Background3D'
 import Navbar from './components/Navbar'
@@ -14,10 +15,21 @@ export default function App() {
     () => localStorage.getItem('cv_theme') || 'dark'
   )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('cv_theme', theme)
   }, [theme])
+
+  const handleSetTheme = (val) => {
+    const next = typeof val === 'function' ? val(theme) : val
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        flushSync(() => setTheme(next))
+      })
+    } else {
+      setTheme(next)
+    }
+  }
 
   return (
     <AdminProvider>
@@ -32,7 +44,7 @@ export default function App() {
 
       <Background3D theme={theme} />
 
-      <Navbar theme={theme} setTheme={setTheme} />
+      <Navbar theme={theme} setTheme={handleSetTheme} />
 
       <main style={{ position: 'relative', zIndex: 1 }}>
         <Hero />

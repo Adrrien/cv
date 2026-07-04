@@ -88,6 +88,38 @@ body {
   50%       { box-shadow: 0 0 26px 6px rgba(72,153,208,0.95); }
 }
 
+/* ── Theme transition (View Transitions API) ──────────────── */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 550ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+::view-transition-old(root) {
+  animation-name: theme-fade-out;
+}
+
+::view-transition-new(root) {
+  animation-name: theme-fade-in;
+}
+
+@keyframes theme-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+@keyframes theme-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.01ms;
+  }
+}
+
 /* ── Utility ──────────────────────────────────────────────── */
 ::selection {
   background: var(--accent);
