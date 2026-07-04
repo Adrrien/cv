@@ -68,9 +68,9 @@ export default function Navbar({ theme, setTheme }) {
       </nav>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        <CtrlBtn onClick={toggleLang}>
-          {i18n.language === 'fr' ? 'FR' : 'EN'}
-        </CtrlBtn>
+          <CtrlBtn onClick={toggleLang}>
+              {i18n.language === 'fr' ? 'EN' : 'FR'}
+          </CtrlBtn>
         <CtrlBtn onClick={toggleTheme} aria-label="Toggle theme">
           {isLight
             ? <MoonIcon />
