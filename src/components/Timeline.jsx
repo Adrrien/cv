@@ -10,24 +10,66 @@ function initials(s) {
 }
 
 function LogoBadge({ item, accentColor }) {
+  const SIZE = 56
+
   return (
-    <div style={{
-      flexShrink: 0,
-      width: 52, height: 52,
-      borderRadius: '50%',
-      overflow: 'hidden',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: item.logo ? 'var(--surface)' : accentColor,
-      border: '1px solid var(--border)',
-      fontFamily: "'Barlow Condensed', sans-serif",
-      fontWeight: 700,
-      fontSize: 18,
-      color: '#fff',
-    }}>
-      {item.logo
-        ? <img src={item.logo} alt="" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        : initials(item.org || '')
-      }
+    <div style={{ position: 'relative', flexShrink: 0, width: SIZE, height: SIZE }}>
+
+      {item.logo && (
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            inset: -18,
+            borderRadius: '50%',
+            background: `url(${item.logo}) center / cover`,
+            filter: 'blur(22px) saturate(180%)',
+            opacity: 0.18,
+            transform: 'scale(1.55)',
+            pointerEvents: 'none',
+          }}
+        />
+      )}
+
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: -14,
+          borderRadius: '50%',
+          background: `radial-gradient(circle, ${accentColor}28 0%, ${accentColor}00 68%)`,
+          filter: 'blur(10px)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div style={{
+        position: 'relative', zIndex: 1,
+        width: SIZE, height: SIZE,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: item.logo ? 'var(--glass)' : accentColor,
+        border: `1.5px solid ${accentColor}55`,
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+      }}>
+        {item.logo
+          ? <img
+              src={item.logo}
+              alt=""
+              loading="lazy"
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          : <span style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 700, fontSize: 19, color: '#fff',
+              letterSpacing: '0.04em',
+            }}>
+              {initials(item.org || '')}
+            </span>
+        }
+      </div>
     </div>
   )
 }

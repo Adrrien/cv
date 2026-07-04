@@ -78,6 +78,11 @@ body {
   50%       { box-shadow: 0 0 26px 6px rgba(232,82,11,0.95); }
 }
 
+@keyframes ambilightPulse {
+  0%, 100% { opacity: 0.6; transform: scale(1.0); }
+  50%       { opacity: 1.0; transform: scale(1.08); }
+}
+
 @keyframes pulseDotBlue {
   0%, 100% { box-shadow: 0 0 14px 2px rgba(72,153,208,0.7); }
   50%       { box-shadow: 0 0 26px 6px rgba(72,153,208,0.95); }
