@@ -6,13 +6,16 @@
     "contact": "Contact"
   },
   "hero": {
-    "subtitle": "Développeur Full-Stack & Passionné d'IA",
+    "kicker": "Étudiant · M1 Architecture & Développement logiciel",
+    "role": "Apprenti Ingénieur logiciel",
+    "tagline": "Développeur passionné par l'expérience utilisateur, la data, le cloud et la création de produits numériques utiles. J'aime transformer des idées en solutions simples, fiables et intuitives.",
     "cta": "Explorer mon parcours",
-    "contact": "Me contacter"
+    "contact": "Me contacter",
+    "openToWork": "Disponible pour de nouvelles opportunités"
   },
   "timeline": {
-    "experience_title": "Expérience",
-    "education_title": "Formation",
+    "experience_title": "Expériences",
+    "education_title": "Formations",
     "exp_label": "Expérience",
     "edu_label": "Formation",
     "present": "Aujourd'hui"
@@ -21,9 +24,10 @@
     "title": "Compétences"
   },
   "contact": {
-    "title": "Contact",
-    "email": "adrrien.chandrakumar@gmail.com",
-    "github": "GitHub",
-    "linkedin": "LinkedIn"
+    "title": "Discutons",
+    "subtitle": "Ouvert aux opportunités de stage, alternance ou CDI.",
+    "cta_email": "Envoyer un email",
+    "cta_github": "Voir GitHub",
+    "cta_linkedin": "Voir LinkedIn"
   }
 }

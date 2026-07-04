@@ -57,6 +57,37 @@ function TabBtn({ active, onClick, children }) {
   )
 }
 
+function LangRow({ label, lang, accentColor, children, style }) {
+  return (
+    <div style={{ position: 'relative', ...style }}>
+      {label && (
+        <div style={{
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 11, letterSpacing: '0.18em',
+          textTransform: 'uppercase', color: '#4a5568',
+          marginBottom: 4,
+        }}>
+          {label}
+        </div>
+      )}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+        <span style={{
+          flexShrink: 0,
+          marginTop: 10,
+          fontFamily: "'Barlow Condensed', sans-serif",
+          fontSize: 10, fontWeight: 700, letterSpacing: '0.1em',
+          color: accentColor,
+          opacity: 0.8,
+          width: 18, textAlign: 'right',
+        }}>
+          {lang}
+        </span>
+        <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      </div>
+    </div>
+  )
+}
+
 function ItemCard({ item, kind, onUpdate, onDelete, onLogo }) {
   const fileRef = useRef(null)
   const accentColor = kind === 'exp' ? '#E8520B' : '#4899D0'
@@ -123,10 +154,20 @@ function ItemCard({ item, kind, onUpdate, onDelete, onLogo }) {
         </button>
       </div>
 
-      <Inp value={item.title} onChange={v => onUpdate('title', v)} placeholder="Titre / Poste" />
+      <LangRow label="Titre" lang="FR" accentColor={accentColor}>
+        <Inp value={item.title} onChange={v => onUpdate('title', v)} placeholder="Titre / Poste (FR)" />
+      </LangRow>
+      <LangRow label="" lang="EN" accentColor="#4899D0" style={{ marginTop: 6 }}>
+        <Inp value={item.titleEn} onChange={v => onUpdate('titleEn', v)} placeholder="Title / Role (EN)" />
+      </LangRow>
       <Inp value={item.org} onChange={v => onUpdate('org', v)} placeholder="Entreprise / École" style={{ marginTop: 8 }} />
       <Inp value={item.date} onChange={v => onUpdate('date', v)} placeholder="Dates (ex: 2023 — 2025)" style={{ marginTop: 8 }} />
-      <TA value={item.desc} onChange={v => onUpdate('desc', v)} rows={2} placeholder="Description" />
+      <LangRow label="Description" lang="FR" accentColor={accentColor} style={{ marginTop: 8 }}>
+        <TA value={item.desc} onChange={v => onUpdate('desc', v)} rows={2} placeholder="Description (FR)" />
+      </LangRow>
+      <LangRow label="" lang="EN" accentColor="#4899D0" style={{ marginTop: 6 }}>
+        <TA value={item.descEn} onChange={v => onUpdate('descEn', v)} rows={2} placeholder="Description (EN)" />
+      </LangRow>
       {kind === 'exp' && (
         <Inp
           value={(item.tags || []).join(', ')}

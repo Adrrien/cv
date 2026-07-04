@@ -75,6 +75,8 @@ function LogoBadge({ item, accentColor }) {
 }
 
 function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items, kindLabel }) {
+  const { i18n } = useTranslation()
+  const isFr = i18n.language === 'fr'
   const listRef = useRef(null)
   const dotRef = useRef(null)
   const rafRef = useRef(null)
@@ -195,7 +197,7 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
                   fontWeight: 600, fontSize: 23, lineHeight: 1.05,
                   color: 'var(--text)',
                 }}>
-                  {item.title}
+                  {isFr ? item.title : (item.titleEn || item.title)}
                 </div>
                 <div style={{ fontSize: 15, color: 'var(--text-muted)', marginTop: 2 }}>
                   {item.org}
@@ -213,7 +215,7 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
             </div>
 
             <p style={{ fontSize: 15.5, lineHeight: 1.65, color: 'var(--text-muted)', textWrap: 'pretty' }}>
-              {item.desc}
+              {isFr ? item.desc : (item.descEn || item.desc)}
             </p>
 
             {item.tags?.length > 0 && (

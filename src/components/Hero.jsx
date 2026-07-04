@@ -3,8 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { useAdmin } from '../context/AdminContext'
 
 export default function Hero() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const { data } = useAdmin()
+  const isFr = i18n.language === 'fr'
+
+  const kicker  = isFr ? (data.profile.kicker  || t('hero.kicker'))  : t('hero.kicker')
+  const role    = isFr ? (data.profile.role     || t('hero.role'))    : t('hero.role')
+  const tagline = isFr ? (data.profile.tagline  || t('hero.tagline')) : t('hero.tagline')
 
   return (
     <section
@@ -24,6 +29,8 @@ export default function Hero() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
+
+
         <span style={{
           display: 'block',
           fontFamily: "'Barlow Condensed', sans-serif",
@@ -33,8 +40,9 @@ export default function Hero() {
           color: 'var(--blue)',
           marginBottom: 18,
         }}>
-          {data.profile.kicker}
+          {kicker}
         </span>
+
         <h1 style={{
           fontFamily: "'Barlow Condensed', sans-serif",
           fontWeight: 700,
@@ -47,6 +55,7 @@ export default function Hero() {
         }}>
           {data.profile.name}
         </h1>
+
         <span style={{
           display: 'block',
           fontFamily: "'Barlow Condensed', sans-serif",
@@ -56,8 +65,9 @@ export default function Hero() {
           color: 'var(--text)',
           marginBottom: 24,
         }}>
-          {data.profile.role}
+          {role}
         </span>
+
         <p style={{
           maxWidth: 560,
           fontSize: 18,
@@ -65,7 +75,7 @@ export default function Hero() {
           color: 'var(--text-muted)',
           textWrap: 'pretty',
         }}>
-          {data.profile.tagline}
+          {tagline}
         </p>
 
         <div style={{ display: 'flex', gap: 16, marginTop: 38, flexWrap: 'wrap' }}>
@@ -82,7 +92,10 @@ export default function Hero() {
               padding: '14px 28px',
               borderRadius: 2,
               whiteSpace: 'nowrap',
+              transition: 'background 0.2s',
             }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#C94009' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'var(--accent)' }}
           >
             {t('hero.cta')}
           </a>
@@ -99,7 +112,10 @@ export default function Hero() {
               padding: '14px 28px',
               borderRadius: 2,
               whiteSpace: 'nowrap',
+              transition: 'border-color 0.2s',
             }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--accent)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)' }}
           >
             {t('hero.contact')}
           </a>

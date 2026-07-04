@@ -68,8 +68,7 @@ export default function Contact() {
       </motion.div>
 
       <p style={{ marginTop: 60, fontSize: 13, color: 'var(--text-muted)', letterSpacing: '0.08em' }}>
-        {data.profile.name} ·{' '}
-        <span style={{ opacity: 0.4 }}>Ctrl+Shift+A pour éditer</span>
+        {data.profile.name} ·{' '} 2026
       </p>
     </section>
   )

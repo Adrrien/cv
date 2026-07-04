@@ -6,9 +6,12 @@
     "contact": "Contact"
   },
   "hero": {
-    "subtitle": "Full-Stack Developer & AI Enthusiast",
+    "kicker": "Student · M1 Software Architecture & Development",
+    "role": "Apprentice Software Engineer",
+    "tagline": "Developer passionate about user experience, data, cloud and building meaningful digital products. I love turning ideas into simple, reliable and intuitive solutions.",
     "cta": "Explore my journey",
-    "contact": "Get in touch"
+    "contact": "Get in touch",
+    "openToWork": "Open to new opportunities"
   },
   "timeline": {
     "experience_title": "Experience",
@@ -21,9 +24,10 @@
     "title": "Skills"
   },
   "contact": {
-    "title": "Contact",
-    "email": "adrrien.chandrakumar@gmail.com",
-    "github": "GitHub",
-    "linkedin": "LinkedIn"
+    "title": "Let's talk",
+    "subtitle": "Open to internship, apprenticeship or full-time opportunities.",
+    "cta_email": "Send an email",
+    "cta_github": "View GitHub",
+    "cta_linkedin": "View LinkedIn"
   }
 }

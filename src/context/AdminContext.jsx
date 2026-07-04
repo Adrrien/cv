@@ -15,15 +15,15 @@ const defaults = () => ({
     linkedin: 'https://linkedin.com/in/adrrien-chandrakumar',
   },
   experiences: [
-    { id: 'e1', title: 'Apprenti Ingénieur logiciel', org: 'Société Générale', date: 'Sept. 2024 — Présent', desc: 'Participation au développement d\'une nouvelle interface de gestion data interne au groupe\n.', logo: '', tags: ['Agile', 'Jenkins', 'React', 'TypeScript', 'Java Spring'] },
-    { id: 'e2', title: 'Développeur Web (Stage)', org: 'Mercialys', date: 'Juin 2024 - Aout 2024', desc: "Refonte complète de l'intranet.", logo: '', tags: ['Agile', 'Wordpress', 'PHP'] },
-    { id: 'e3', title: 'Employé CSC', org: 'Boulanger SA', date: 'Nov. 2023 - Avril 2024', desc: "Gestion de la clientèle au Service Après Vente, en Caisse et en financement", logo: '', tags: ['Organisation', 'Financements', 'Communication'] },
-    { id: 'e4', title: 'Développeur Web (Stage)',  org: 'Pangée ONG', date: 'Mai. 2023 - Juillet 2023', desc: "Assistance à l'équipe de développement en place", logo: '', tags: ['Base de donnée', 'Odoo', 'Wordpress', 'Photoshop'] },
+    { id: 'e1', title: 'Apprenti Ingénieur logiciel', titleEn: 'Apprentice Software Engineer', org: 'Société Générale', date: 'Sept. 2024 — Présent', desc: "Participation au développement d'une nouvelle interface de gestion data interne au groupe.", descEn: 'Contributed to the development of a new internal data management interface for the group, working across backend and frontend within an agile team.', logo: '', tags: ['Agile', 'Jenkins', 'React', 'TypeScript', 'Java Spring'] },
+    { id: 'e2', title: 'Développeur Web (Stage)', titleEn: 'Web Developer (Internship)', org: 'Mercialys', date: 'Juin 2024 - Aout 2024', desc: "Refonte complète de l'intranet.", descEn: 'Complete redesign of the company intranet, modernising both the tech stack and user experience.', logo: '', tags: ['Agile', 'Wordpress', 'PHP'] },
+    { id: 'e3', title: 'Employé CSC', titleEn: 'Customer Service Representative', org: 'Boulanger SA', date: 'Nov. 2023 - Avril 2024', desc: 'Gestion de la clientèle au Service Après Vente, en Caisse et en financement', descEn: 'Handled customer relations across After-Sales Service, Checkout and financing — developing strong communication and problem-solving skills.', logo: '', tags: ['Organisation', 'Financements', 'Communication'] },
+    { id: 'e4', title: 'Développeur Web (Stage)', titleEn: 'Web Developer (Internship)', org: 'Pangée ONG', date: 'Mai. 2023 - Juillet 2023', desc: "Assistance à l'équipe de développement en place", descEn: 'Assisted the existing development team, contributing to ongoing web projects and learning collaborative development practices.', logo: '', tags: ['Base de donnée', 'Odoo', 'Wordpress', 'Photoshop'] },
   ],
   formations: [
-    { id: 'f1', title: 'Master', org: 'Efrei - Grande école du numérique', date: '2025 — 2027', desc: 'Architecture & Développement logiciel.', logo: '' },
-    { id: 'f2', title: 'Licence', org: 'Efrei - Grande école du numérique', date: '2023 — 2025', desc: 'Sciences & Ingénierie - Informatique', logo: '' },
-    { id: 'f3', title: 'Echange', org: 'APU - Asia Pacific University of Technology', date: 'Avril 2024 — Juin 2024', desc: 'Business Intelligence, Design thinking & Digital transformation', logo: '' },
+    { id: 'f1', title: 'Master', titleEn: "Master's Degree", org: 'Efrei - Grande école du numérique', date: '2025 — 2027', desc: 'Architecture & Développement logiciel.', descEn: 'Software Architecture & Development — covering microservices, cloud-native design, DevOps and enterprise software engineering.', logo: '' },
+    { id: 'f2', title: 'Licence', titleEn: "Bachelor's Degree", org: 'Efrei - Grande école du numérique', date: '2023 — 2025', desc: 'Sciences & Ingénierie - Informatique', descEn: 'Science & Engineering — Computer Science track, covering algorithms, systems, databases and software development fundamentals.', logo: '' },
+    { id: 'f3', title: 'Echange', titleEn: 'Exchange Program', org: 'APU - Asia Pacific University of Technology', date: 'Avril 2024 — Juin 2024', desc: 'Business Intelligence, Design thinking & Digital transformation', descEn: 'Business Intelligence, Design Thinking & Digital Transformation — international experience broadening analytical and strategic perspectives.', logo: '' },
   ],
   skills: [
     { id: 's1', name: 'Java', category: 'Développement' },
@@ -37,15 +37,18 @@ const defaults = () => ({
     { id: 's8', name: 'Jenkins', category: 'DevOps & Cloud' },
     { id: 's9', name: 'CI/CD', category: 'DevOps & Cloud' },
     { id: 's10', name: 'Git', category: 'DevOps & Cloud' },
+    { id: 's11', name: 'AWS (Amazon Web Services)', category: 'DevOps & Cloud' },
 
     { id: 's11', name: 'Linux', category: 'Systèmes' },
     { id: 's12', name: 'Bash', category: 'Systèmes' },
 
-    { id: 's13', name: 'PostgreSQL', category: 'Base de données' },
+    { id: 's13', name: 'PostgreSQL / MySQL', category: 'Base de données' },
+    { id: 's16', name: 'MongoDB / Redis', category: 'Base de données' },
     { id: 's14', name: 'Elasticsearch', category: 'Big Data' },
     { id: 's15', name: 'Kibana', category: 'Big Data' },
 
     { id: 's16', name: 'UX/UI', category: 'Conception' },
+    { id: 's17', name: 'Figma', category: 'Conception' },
   ]
 })
 
@@ -64,6 +67,21 @@ export function AdminProvider({ children }) {
           Array.isArray(p?.formations) &&
           Array.isArray(p?.skills)
         ) {
+          const defs = defaults()
+          p.experiences = p.experiences.map(item => {
+            if (!item.titleEn && !item.descEn) {
+              const def = defs.experiences.find(d => d.id === item.id)
+              if (def) return { ...item, titleEn: def.titleEn, descEn: def.descEn }
+            }
+            return item
+          })
+          p.formations = p.formations.map(item => {
+            if (!item.titleEn && !item.descEn) {
+              const def = defs.formations.find(d => d.id === item.id)
+              if (def) return { ...item, titleEn: def.titleEn, descEn: def.descEn }
+            }
+            return item
+          })
           return p
         }
       }
@@ -98,11 +116,11 @@ export function AdminProvider({ children }) {
     setAdminOpen,
     updateProfile: (field, val) => setData(d => { d.profile[field] = val; return d }),
     addExperience: () => setData(d => {
-      d.experiences.push({ id: 'e' + Date.now(), title: 'Nouveau poste', org: 'Entreprise', date: '2025', desc: '', logo: '', tags: [] })
+      d.experiences.push({ id: 'e' + Date.now(), title: 'Nouveau poste', titleEn: 'New position', org: 'Entreprise', date: '2025', desc: '', descEn: '', logo: '', tags: [] })
       return d
     }),
     addFormation: () => setData(d => {
-      d.formations.push({ id: 'f' + Date.now(), title: 'Nouvelle formation', org: 'École', date: '2025', desc: '', logo: '' })
+      d.formations.push({ id: 'f' + Date.now(), title: 'Nouvelle formation', titleEn: 'New degree', org: 'École', date: '2025', desc: '', descEn: '', logo: '' })
       return d
     }),
     updateItem: (kind, id, field, val) => setData(d => {
