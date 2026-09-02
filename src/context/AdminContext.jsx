@@ -7,7 +7,7 @@ const defaults = () => ({
   dataVersion: DATA_VERSION,
   profile: {
     name: 'Adrrien CHANDRAKUMAR',
-    kicker: 'Étudiant · M1 Architecture & Développement logiciel',
+    kicker: 'Étudiant · M2 Architecture & Développement logiciel',
     role: 'Apprenti Ingénieur logiciel',
     tagline: "Développeur passionné par l'expérience utilisateur, la data, le cloud et la création de produits numériques utiles. J'aime transformer des idées en solutions simples, fiables et intuitives.",
     email: 'adrrien.chandrakumar@gmail.com',
