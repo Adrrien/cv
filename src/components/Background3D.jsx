@@ -1,140 +1,216 @@
 import { useEffect, useRef } from 'react'
+import * as THREE from 'three'
+
+const COLS = 130
+const ROWS = 85
+const SPACING = 2.5
+
+const vert = /* glsl */`
+uniform float u_time;
+uniform vec2 u_mouseWorld;
+varying float v_wave;
+varying float v_influence;
+
+void main() {
+  float x = position.x;
+  float z = position.z;
+
+  float wave =
+      sin(x * 0.016 + u_time * 0.52) * 3.4
+    + cos(z * 0.013 + u_time * 0.37) * 2.7
+    + sin((x + z) * 0.0095 + u_time * 0.44) * 1.9
+    + cos(x * 0.009 - z * 0.011 + u_time * 0.28) * 1.4
+    + sin(x * 0.005 + z * 0.007 + u_time * 0.19) * 0.9;
+
+  float dx = x - u_mouseWorld.x;
+  float dz = z - u_mouseWorld.y;
+  float dist = length(vec2(dx, dz));
+  float inf = 1.0 - smoothstep(0.0, 40.0, dist);
+  inf = inf * inf * (3.0 - 2.0 * inf);
+
+  v_wave = clamp((wave + 10.5) / 21.0, 0.0, 1.0);
+  v_influence = inf;
+
+  vec3 pos = vec3(x, wave - inf * 15.0, z);
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+  gl_PointSize = 1.3 + inf * 3.5;
+}
+`
+
+const frag = /* glsl */`
+uniform vec3 u_colorBase;
+uniform vec3 u_colorAccent;
+uniform float u_opacity;
+varying float v_wave;
+varying float v_influence;
+
+void main() {
+  float d = length(gl_PointCoord - vec2(0.5));
+  if (d > 0.5) discard;
+  float soft = 1.0 - smoothstep(0.25, 0.5, d);
+
+  vec3 col = mix(u_colorBase, u_colorAccent, v_influence * 0.9);
+  float a = (0.08 + v_wave * 0.36 + v_influence * 0.56) * u_opacity * soft;
+  gl_FragColor = vec4(col, a);
+}
+`
 
 export default function Background3D({ theme }) {
-  const cvRef = useRef(null)
+  const mountRef = useRef(null)
+  const themeRef = useRef(theme)
+  themeRef.current = theme
 
   useEffect(() => {
-    const cv = cvRef.current
-    if (!cv) return
-    const ctx = cv.getContext('2d')
-    let W, H, dpr, raf
+    const mount = mountRef.current
+    if (!mount) return
 
-    const mouse = { x: -9999, y: -9999 }
-    const onMove = (e) => { mouse.x = e.clientX; mouse.y = e.clientY }
-    const onLeave = () => { mouse.x = -9999; mouse.y = -9999 }
-    window.addEventListener('mousemove', onMove, { passive: true })
-    window.addEventListener('mouseleave', onLeave)
+    let cancelled = false
+    const W = window.innerWidth
+    const H = window.innerHeight
 
-    const resize = () => {
-      dpr = Math.min(window.devicePixelRatio || 1, 2)
-      W = window.innerWidth
-      H = window.innerHeight
-      cv.width = W * dpr
-      cv.height = H * dpr
-      cv.style.width = W + 'px'
-      cv.style.height = H + 'px'
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    // Scene
+    const scene = new THREE.Scene()
+
+    // Camera — angled to see the 3D wave terrain
+    const camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 2000)
+    camera.position.set(0, 60, 108)
+    camera.lookAt(0, 0, -18)
+
+    // Renderer — Three.js creates its own canvas element
+    let renderer
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true })
+    } catch {
+      return
     }
-    resize()
-    window.addEventListener('resize', resize)
+    if (cancelled) { renderer.dispose(); return }
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5))
+    renderer.setSize(W, H)
+    renderer.setClearColor(0, 0)
+    Object.assign(renderer.domElement.style, {
+      position: 'absolute', top: 0, left: 0, display: 'block', pointerEvents: 'none',
+    })
+    mount.appendChild(renderer.domElement)
 
-    const noise = (x, y, t) =>
-      Math.sin(x * 0.016 + t * 0.22) * 32
-      + Math.cos(y * 0.022 + t * 0.15) * 22
-      + Math.sin((x + y) * 0.010 + t * 0.31) * 16
-      + Math.cos(x * 0.007 - y * 0.009 + t * 0.18) * 10
+    // Grid geometry — COLS × ROWS points on the XZ plane
+    const count = COLS * ROWS
+    const positions = new Float32Array(count * 3)
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        const i = r * COLS + c
+        positions[i * 3]     = (c - COLS / 2) * SPACING
+        positions[i * 3 + 1] = 0
+        positions[i * 3 + 2] = (r - ROWS / 2) * SPACING
+      }
+    }
+    const geo = new THREE.BufferGeometry()
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
-    // Smooth repulsion: pushes each line point away from cursor in Y
-    const MOUSE_R = 320   // radius of influence (px)
-    const MOUSE_S = 80    // max deflection strength (px)
-
-    const mouseDisp = (x, lineY) => {
-      const dx = x - mouse.x
-      const dy = lineY - mouse.y
-      const dist2 = dx * dx + dy * dy
-      if (dist2 >= MOUSE_R * MOUSE_R) return 0
-      const dist = Math.sqrt(dist2)
-      const t = 1 - dist / MOUSE_R
-      const smooth = t * t * (3 - 2 * t)          // smoothstep falloff
-      const dirY = dist > 0 ? dy / dist : -1       // unit vector in Y
-      return dirY * smooth * MOUSE_S
+    // Shader uniforms — mouse starts far off-grid so no initial orange blob
+    const uniforms = {
+      u_time:        { value: 0 },
+      u_mouseWorld:  { value: new THREE.Vector2(9999, 9999) },
+      u_colorBase:   { value: new THREE.Color(0x4899D0) },
+      u_colorAccent: { value: new THREE.Color(0xE8520B) },
+      u_opacity:     { value: theme === 'dark' ? 1.0 : 0.6 },
     }
 
-    const getScroll = () => {
-      const hero = document.getElementById('hero-section')
-      return hero ? Math.max(0, -hero.getBoundingClientRect().top) : (window.scrollY || 0)
+    const mat = new THREE.ShaderMaterial({
+      uniforms,
+      vertexShader: vert,
+      fragmentShader: frag,
+      transparent: true,
+      depthWrite: false,
+    })
+
+    scene.add(new THREE.Points(geo, mat))
+
+    // Mouse → world-space via ray–plane intersection
+    const raycaster = new THREE.Raycaster()
+    const ndcMouse = new THREE.Vector2(0, 0)
+    const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0)
+    const worldPt = new THREE.Vector3()
+    const targetMouse = new THREE.Vector2(9999, 9999)
+
+    const onMouseMove = (e) => {
+      ndcMouse.set(
+        (e.clientX / window.innerWidth) * 2 - 1,
+        -(e.clientY / window.innerHeight) * 2 + 1,
+      )
     }
+    window.addEventListener('mousemove', onMouseMove, { passive: true })
 
-    const draw = (now) => {
-      const t = now * 0.001
-      const sc = getScroll()
-      const light = theme === 'light'
+    // Animation loop
+    let raf
+    const timer = new THREE.Timer()
 
-      ctx.fillStyle = light ? '#eef2f8' : '#05060a'
-      ctx.fillRect(0, 0, W, H)
+    const animate = () => {
+      raf = requestAnimationFrame(animate)
+      timer.update()
+      const t = timer.getElapsed()
+      uniforms.u_time.value = t
 
-      const LINE_SPACING = 14
-      const numLines = Math.ceil(H / LINE_SPACING) + 6
-      const scrollOffset = (sc * 0.04) % LINE_SPACING
+      // Smooth mouse follow in world space
+      raycaster.setFromCamera(ndcMouse, camera)
+      if (raycaster.ray.intersectPlane(groundPlane, worldPt)) {
+        targetMouse.set(worldPt.x, worldPt.z)
+      }
+      uniforms.u_mouseWorld.value.lerp(targetMouse, 0.07)
 
-      for (let row = 0; row < numLines; row++) {
-        const baseY = row * LINE_SPACING - scrollOffset
-        if (baseY < -LINE_SPACING * 2 || baseY > H + LINE_SPACING) continue
+      // Scroll-based camera parallax
+      const scroll = window.scrollY
+      camera.position.y = 60 + scroll * 0.012
+      camera.lookAt(0, scroll * 0.006, -18)
 
-        const brightness = 0.5 + 0.5 * Math.sin(row * 0.19 + t * 0.35)
-        const hue = 215 + Math.sin(row * 0.18 + t * 0.18) * 25
+      // Smooth theme opacity transition
+      const isDark = themeRef.current === 'dark'
+      const targetOpacity = isDark ? 1.0 : 0.52
+      uniforms.u_opacity.value += (targetOpacity - uniforms.u_opacity.value) * 0.04
 
-        // Check if this line is near the mouse — highlight it slightly
-        const rowDist = Math.abs(baseY - mouse.y)
-        const nearMouse = rowDist < MOUSE_R
-        const mouseProx = nearMouse ? Math.max(0, 1 - rowDist / MOUSE_R) : 0
-
-        const alpha = light
-          ? (0.06 + brightness * 0.10 + mouseProx * 0.12)
-          : (0.10 + brightness * 0.20 + mouseProx * 0.18)
-
-        ctx.beginPath()
-        // First point
-        const y0 = baseY + noise(0, baseY, t) + mouseDisp(0, baseY)
-        ctx.moveTo(-4, y0)
-
-        for (let x = 0; x <= W + 4; x += 4) {
-          const ny = noise(x, baseY, t)
-          const my = mouseDisp(x, baseY)
-          ctx.lineTo(x, baseY + ny + my)
-        }
-
-        ctx.strokeStyle = nearMouse
-          ? `hsla(22,80%,${light ? 50 : 68}%,${alpha.toFixed(3)})`   // orange tint near mouse
-          : `hsla(${hue.toFixed(1)},50%,${light ? 40 : 62}%,${alpha.toFixed(3)})`
-        ctx.lineWidth = nearMouse ? 0.9 : 0.7
-        ctx.stroke()
+      // Adjust base color for light mode readability
+      if (isDark) {
+        uniforms.u_colorBase.value.set(0x4899D0)
+      } else {
+        uniforms.u_colorBase.value.set(0x1f5c8a)
       }
 
-      // Ambient gradient blob (static)
-      const ag = ctx.createRadialGradient(W * 0.62, H * 0.42, 0, W * 0.62, H * 0.42, Math.min(W, H) * 0.55)
-      ag.addColorStop(0, light ? 'rgba(232,82,11,0.04)' : 'rgba(232,82,11,0.05)')
-      ag.addColorStop(0.5, light ? 'rgba(72,153,208,0.03)' : 'rgba(72,153,208,0.04)')
-      ag.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.fillStyle = ag
-      ctx.fillRect(0, 0, W, H)
-
-      // Mouse halo glow — orange/amber radial at cursor
-      if (mouse.x > 0) {
-        const mg = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, MOUSE_R * 0.9)
-        mg.addColorStop(0, light ? 'rgba(232,82,11,0.07)' : 'rgba(232,82,11,0.10)')
-        mg.addColorStop(0.45, light ? 'rgba(232,82,11,0.025)' : 'rgba(232,82,11,0.04)')
-        mg.addColorStop(1, 'rgba(0,0,0,0)')
-        ctx.fillStyle = mg
-        ctx.fillRect(mouse.x - MOUSE_R, mouse.y - MOUSE_R, MOUSE_R * 2, MOUSE_R * 2)
-      }
-
-      raf = requestAnimationFrame(draw)
+      renderer.render(scene, camera)
     }
-    raf = requestAnimationFrame(draw)
+    animate()
+
+    // Resize
+    const onResize = () => {
+      const W = window.innerWidth, H = window.innerHeight
+      camera.aspect = W / H
+      camera.updateProjectionMatrix()
+      renderer.setSize(W, H)
+    }
+    window.addEventListener('resize', onResize, { passive: true })
 
     return () => {
+      cancelled = true
       cancelAnimationFrame(raf)
-      window.removeEventListener('resize', resize)
-      window.removeEventListener('mousemove', onMove)
-      window.removeEventListener('mouseleave', onLeave)
+      window.removeEventListener('mousemove', onMouseMove)
+      window.removeEventListener('resize', onResize)
+      geo.dispose()
+      mat.dispose()
+      if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)
+      renderer.forceContextLoss()
+      renderer.dispose()
     }
-  }, [theme])
+  }, [])
 
   return (
-    <canvas
-      ref={cvRef}
-      style={{ position: 'fixed', inset: 0, zIndex: 0, display: 'block', pointerEvents: 'none' }}
+    <div
+      ref={mountRef}
+      style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100vw', height: '100vh',
+        zIndex: 0,
+        pointerEvents: 'none',
+        overflow: 'hidden',
+      }}
     />
   )
 }
