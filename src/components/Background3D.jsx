@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
-const COLS = 130
-const ROWS = 85
+const COLS = 140
+const ROWS = 160
 const SPACING = 2.5
 
 const vert = /* glsl */`
@@ -10,6 +10,7 @@ uniform float u_time;
 uniform vec2 u_mouseWorld;
 varying float v_wave;
 varying float v_influence;
+varying float v_edge;
 
 void main() {
   float x = position.x;
@@ -28,12 +29,20 @@ void main() {
   float inf = 1.0 - smoothstep(0.0, 40.0, dist);
   inf = inf * inf * (3.0 - 2.0 * inf);
 
+  /* Edge fade — smooth dissolve on all 4 borders */
+  float xFade = 1.0 - smoothstep(130.0, 175.0, abs(x));
+  float zMin = -310.0; float zMax = 90.0;
+  float zMid = (zMin + zMax) * 0.5;
+  float zHalf = (zMax - zMin) * 0.5;
+  float zFade = 1.0 - smoothstep(0.72, 1.0, abs(z - zMid) / zHalf);
+  v_edge = xFade * zFade;
+
   v_wave = clamp((wave + 10.5) / 21.0, 0.0, 1.0);
   v_influence = inf;
 
   vec3 pos = vec3(x, wave - inf * 15.0, z);
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
-  gl_PointSize = 1.3 + inf * 3.5;
+  gl_PointSize = 2.2 + inf * 4.0;
 }
 `
 
@@ -43,6 +52,7 @@ uniform vec3 u_colorAccent;
 uniform float u_opacity;
 varying float v_wave;
 varying float v_influence;
+varying float v_edge;
 
 void main() {
   float d = length(gl_PointCoord - vec2(0.5));
@@ -50,7 +60,7 @@ void main() {
   float soft = 1.0 - smoothstep(0.25, 0.5, d);
 
   vec3 col = mix(u_colorBase, u_colorAccent, v_influence * 0.9);
-  float a = (0.08 + v_wave * 0.36 + v_influence * 0.56) * u_opacity * soft;
+  float a = (0.22 + v_wave * 0.58 + v_influence * 0.56) * u_opacity * soft * v_edge;
   gl_FragColor = vec4(col, a);
 }
 `
@@ -100,7 +110,7 @@ export default function Background3D({ theme }) {
         const i = r * COLS + c
         positions[i * 3]     = (c - COLS / 2) * SPACING
         positions[i * 3 + 1] = 0
-        positions[i * 3 + 2] = (r - ROWS / 2) * SPACING
+        positions[i * 3 + 2] = (r - ROWS / 2) * SPACING - 110
       }
     }
     const geo = new THREE.BufferGeometry()
@@ -211,6 +221,28 @@ export default function Background3D({ theme }) {
         pointerEvents: 'none',
         overflow: 'hidden',
       }}
-    />
+    >
+      {/* Top fade */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, right: 0,
+        height: '65%',
+        background: 'linear-gradient(to bottom, var(--bg) 0%, var(--bg) 15%, color-mix(in srgb, var(--bg) 70%, transparent) 45%, color-mix(in srgb, var(--bg) 20%, transparent) 75%, transparent 100%)',
+        pointerEvents: 'none', zIndex: 1,
+      }} />
+      {/* Left fade */}
+      <div style={{
+        position: 'absolute', top: 0, left: 0, bottom: 0,
+        width: '12%',
+        background: 'linear-gradient(to right, var(--bg), transparent)',
+        pointerEvents: 'none', zIndex: 1,
+      }} />
+      {/* Right fade */}
+      <div style={{
+        position: 'absolute', top: 0, right: 0, bottom: 0,
+        width: '12%',
+        background: 'linear-gradient(to left, var(--bg), transparent)',
+        pointerEvents: 'none', zIndex: 1,
+      }} />
+    </div>
   )
 }
