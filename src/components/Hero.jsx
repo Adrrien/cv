@@ -1,10 +1,13 @@
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAdmin } from '../context/AdminContext'
+import { useIsMobile } from '../hooks/useIsMobile'
+
 export default function Hero() {
   const { t, i18n } = useTranslation()
   const { data } = useAdmin()
   const isFr = i18n.language === 'fr'
+  const isMobile = useIsMobile()
 
   const kicker  = isFr ? (data.profile.kicker  || t('hero.kicker'))  : t('hero.kicker')
   const role    = isFr ? (data.profile.role     || t('hero.role'))    : t('hero.role')
@@ -19,7 +22,7 @@ export default function Hero() {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
-        padding: '0 48px',
+        padding: isMobile ? '0 20px' : '0 48px',
         maxWidth: 1200,
         margin: '0 auto',
         overflow: 'hidden',
@@ -41,7 +44,7 @@ export default function Hero() {
           <span style={{
             fontFamily: "'Barlow Condensed', sans-serif",
             fontSize: 13,
-            letterSpacing: '0.42em',
+            letterSpacing: isMobile ? '0.18em' : '0.42em',
             textTransform: 'uppercase',
             color: 'var(--blue)',
           }}>

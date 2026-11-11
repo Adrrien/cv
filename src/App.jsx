@@ -2,6 +2,8 @@ import { useState, useLayoutEffect } from 'react'
 import { flushSync } from 'react-dom'
 import { AdminProvider } from './context/AdminContext'
 import Background3D from './components/Background3D'
+import MobileBackground from './components/MobileBackground'
+import { useIsMobile } from './hooks/useIsMobile'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Timeline from './components/Timeline'
@@ -19,6 +21,8 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('cv_theme', theme)
   }, [theme])
+
+  const isMobile = useIsMobile()
 
   const handleSetTheme = (val) => {
     const next = typeof val === 'function' ? val(theme) : val
@@ -42,7 +46,7 @@ export default function App() {
         pointerEvents: 'none',
       }} />
 
-      <Background3D theme={theme} />
+      {isMobile ? <MobileBackground /> : <Background3D theme={theme} />}
 
       <Navbar theme={theme} setTheme={handleSetTheme} />
 

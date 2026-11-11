@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAdmin } from '../context/AdminContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 function initials(s) {
   if (!s) return '?'
@@ -82,6 +83,7 @@ function TiltCard({ children, style, accentColor }) {
 function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items, kindLabel }) {
   const { i18n } = useTranslation()
   const isFr = i18n.language === 'fr'
+  const isMobile = useIsMobile()
   const listRef = useRef(null)
   const dotRef  = useRef(null)
   const rafRef  = useRef(null)
@@ -117,7 +119,7 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
   }, [accentColor])
 
   return (
-    <section id={id} style={{ maxWidth: 920, margin: '0 auto', padding: '80px 40px 20px' }}>
+    <section id={id} style={{ maxWidth: 920, margin: '0 auto', padding: isMobile ? '60px 16px 20px' : '80px 40px 20px' }}>
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -147,16 +149,16 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
         </h2>
       </motion.div>
 
-      <div ref={listRef} style={{ position: 'relative', paddingLeft: 60 }}>
+      <div ref={listRef} style={{ position: 'relative', paddingLeft: isMobile ? 42 : 60 }}>
         {/* Timeline spine */}
         <div style={{
-          position: 'absolute', left: 21, top: 10, bottom: 10,
+          position: 'absolute', left: isMobile ? 14 : 21, top: 10, bottom: 10,
           width: 1.5,
           background: `linear-gradient(to bottom, ${accentColor}00, ${accentColor}60 15%, ${accentColor}60 85%, ${accentColor}00)`,
         }} />
         {/* Animated scroll dot */}
         <div ref={dotRef} style={{
-          position: 'absolute', left: 15, top: 0,
+          position: 'absolute', left: isMobile ? 8 : 15, top: 0,
           width: 15, height: 15, borderRadius: '50%',
           background: accentColor, zIndex: 3,
           boxShadow: `0 0 0 3px var(--bg), 0 0 16px ${accentColor}`,
@@ -175,7 +177,7 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
           >
             {/* Timeline dot */}
             <div data-node style={{
-              position: 'absolute', left: -44, top: 28,
+              position: 'absolute', left: isMobile ? -30 : -44, top: 28,
               width: 13, height: 13, borderRadius: '50%',
               background: 'var(--bg)',
               border: '1.5px solid var(--border)',
@@ -192,7 +194,7 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
               WebkitBackdropFilter: 'blur(12px)',
             }}>
               {/* Top bar: logo + title */}
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: isMobile ? 12 : 16, marginBottom: 12 }}>
                 <LogoBadge item={item} accentColor={accentColor} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
@@ -205,30 +207,42 @@ function TrackSection({ id, titleNum, titleText, titleColor, accentColor, items,
                   </div>
                   <div style={{
                     fontFamily: "'Barlow Condensed', sans-serif",
-                    fontWeight: 700, fontSize: 22, lineHeight: 1.08,
+                    fontWeight: 700, fontSize: isMobile ? 18 : 22, lineHeight: 1.1,
                     color: 'var(--text)',
                   }}>
                     {isFr ? item.title : (item.titleEn || item.title)}
                   </div>
-                  <div style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 3 }}>
+                  <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 3 }}>
                     {item.org}
                   </div>
+                  {isMobile && (
+                    <div style={{
+                      marginTop: 5,
+                      fontFamily: "'Barlow Condensed', sans-serif",
+                      fontSize: 11, letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      color: 'var(--text-muted)',
+                    }}>
+                      {item.date}
+                    </div>
+                  )}
                 </div>
-                {/* Date badge */}
-                <div style={{
-                  flexShrink: 0,
-                  fontFamily: "'Barlow Condensed', sans-serif",
-                  fontSize: 11, letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'var(--text-muted)',
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 2,
-                  padding: '4px 9px',
-                  whiteSpace: 'nowrap',
-                }}>
-                  {item.date}
-                </div>
+                {!isMobile && (
+                  <div style={{
+                    flexShrink: 0,
+                    fontFamily: "'Barlow Condensed', sans-serif",
+                    fontSize: 11, letterSpacing: '0.16em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-muted)',
+                    background: 'var(--surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: 2,
+                    padding: '4px 9px',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {item.date}
+                  </div>
+                )}
               </div>
 
               {/* Divider */}

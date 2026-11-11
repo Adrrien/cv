@@ -1,12 +1,14 @@
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAdmin } from '../context/AdminContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 const PALETTE = ['#E8520B', '#4899D0', '#1f6b9e', '#b8430a', '#3a7bbf', '#d04c0a']
 
 export default function Skills() {
   const { t } = useTranslation()
   const { data } = useAdmin()
+  const isMobile = useIsMobile()
 
   const groups = []
   const map = {}
@@ -23,7 +25,7 @@ export default function Skills() {
   })
 
   return (
-    <section id="skills" style={{ maxWidth: 920, margin: '0 auto', padding: '80px 40px 60px' }}>
+    <section id="skills" style={{ maxWidth: 920, margin: '0 auto', padding: isMobile ? '60px 16px 60px' : '80px 40px 60px' }}>
       {/* Section header */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
@@ -54,7 +56,7 @@ export default function Skills() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+        gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))',
         gap: 20,
       }}>
         {groups.map((group, gi) => (

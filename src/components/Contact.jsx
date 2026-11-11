@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useAdmin } from '../context/AdminContext'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 function ContactLink({ href, label, sublabel, icon, target, rel, accentColor = 'var(--accent)' }) {
   return (
@@ -71,13 +72,14 @@ function ContactLink({ href, label, sublabel, icon, target, rel, accentColor = '
 export default function Contact() {
   const { t } = useTranslation()
   const { data } = useAdmin()
+  const isMobile = useIsMobile()
   const { email, github, linkedin } = data.profile
 
   const githubHandle = github?.replace('https://github.com/', '@') || github
   const liHandle     = linkedin?.replace('https://linkedin.com/in/', '') || linkedin
 
   return (
-    <section id="contact" style={{ maxWidth: 920, margin: '0 auto', padding: '80px 40px 140px' }}>
+    <section id="contact" style={{ maxWidth: 920, margin: '0 auto', padding: isMobile ? '60px 16px 80px' : '80px 40px 140px' }}>
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, x: -20 }}
